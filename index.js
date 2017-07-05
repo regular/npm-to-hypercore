@@ -18,12 +18,6 @@ module.exports = function getStream(seq) {
   run()
   return pushable.source
 
-  function append(id, seq, doc) {
-    doc._seq = seq
-    doc.id = id
-    pushable.push(doc)
-  }
-
   function run () {
     console.log('feching changes since sequence #%s', seq)
     pump(changesSinceStream(seq), normalize, function(err) {
@@ -60,8 +54,10 @@ module.exports = function getStream(seq) {
     while(versions.length) {
       var version = versions.shift()
       if (version) {
-        var key = change.id + '@' + version
-        append(key, change.seq, doc.versions[version])
+        var pkg = doc.versions[version]
+        pkg._seq = seq
+        pkg.id = change.id + '@' + version
+        pushable.push(pkg)
       }
     }
     cb()
