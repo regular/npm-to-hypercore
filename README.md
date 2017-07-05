@@ -1,39 +1,25 @@
-# npm-to-hypercore
+# pull-npm-registry
 
-A simple data fetcher that streams all changes made to npm and stores
-them in Hypercore. The changes are stored such that each version of a
-package that's released is one block in Hypercore.
+A simple data fetcher that provides all changes made to the npm registry as a pull-stream. Streams old and live data.
 
-[![Build status](https://travis-ci.org/watson/npm-to-hypercore.svg?branch=master)](https://travis-ci.org/watson/npm-to-hypercore)
-[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
+Inspired by [npm-to-hypercore](https://github.com/watson/npm-to-hypercore)
 
 ## Installation
 
 ```
-npm install npm-to-hypercore -g
+npm install pull-npm-registry
 ```
 
 ## Usage
 
 ```
-npm-to-hypercore [db]
-```
+var pull = require('pull-stream')
+var npm = require('pull-npm-registry')
 
-Just run the `npm-to-hypercore` command. Takes an optional `db` argument
-to use as the path to the database.
-
-## Try it out
-
-We have an instance of this running already. You can replicate data from it by using this hypercore key
-
-```
-f5d045813912dadbff4bdc8a43bb78da6685f965f1a88e430db49c793a5a1a01
-```
-
-To test it out you can use hypertail
-
-```
-hypertail /tmp/npm-to-hypercore f5d045813912dadbff4bdc8a43bb78da6685f965f1a88e430db49c793a5a1a01
+pull(
+  npm(0), // give it the first sequence number you want
+  pull.log()
+)
 ```
 
 ## License

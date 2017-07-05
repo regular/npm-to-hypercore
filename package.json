@@ -2,7 +2,6 @@
   "name": "pull-npm-registry",
   "version": "1.0.0",
   "description": "Pull all of npm's metadata",
-  "bin": "cli.js",
   "dependencies": {
     "changes-stream": "^2.2.0",
     "normalize-registry-metadata": "^1.1.2",
@@ -11,5 +10,23 @@
     "pump": "^1.0.2",
     "through2": "^2.0.3"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/regular/pull-npm-registry.git"
+  },
+  "keywords": [
+    "pull-stream",
+    "npm",
+    "replicate"
+  ],
+  "author": "Jan Bölsche <jan@lagomorph.de> (http://regular.codes)",
+  "bugs": {
+    "url": "https://github.com/regular/pull-npm-registry/issues"
+  },
+  "homepage": "https://github.com/regular/pull-npm-registry#readme"
 }
