@@ -6,9 +6,9 @@ var pump = require('pump')
 var path = require('path')
 var pull = require('pull-stream')
 var Pushable = require('pull-pushable')
+var clean = require('normalize-registry-metadata')
 
 module.exports = function getStream(seq) {
-  var clean = require('normalize-registry-metadata')
 
   var normalize = through2.obj(transform)
   var running = true 
@@ -26,8 +26,9 @@ module.exports = function getStream(seq) {
       }
       return true
     }),
-    pull.through( (change)=>{
-      clean(change.doc)
+    pull.filter( (change)=>{
+      // returns undefined id doc is invalid
+      return clean(change.doc)
     }),
     pull.filter( (change)=>{
       var doc = change.doc
