@@ -3,14 +3,12 @@
 var ChangesStream = require('changes-stream')
 var through2 = require('through2')
 var pump = require('pump')
-var level = require('level')
 var path = require('path')
 var Pushable = require('pull-pushable')
 
-module.exports = function getStream(directory, seq) {
+module.exports = function getStream(seq) {
   var clean = require('normalize-registry-metadata')
 
-  var db = level(path.join(directory, 'index'))
   var normalize = through2.obj(transform)
   var running = true 
   var pushable = Pushable(true, function(err) {
@@ -20,10 +18,10 @@ module.exports = function getStream(directory, seq) {
   run()
   return pushable.source
 
-  function append(seq, doc, cb) {
+  function append(id, seq, doc) {
     doc._seq = seq
+    doc.id = id
     pushable.push(doc)
-    cb(running ? null: new Error())
   }
 
   function run () {
@@ -52,42 +50,21 @@ module.exports = function getStream(directory, seq) {
 
     if (!doc) {
       console.log('skipping %s - invalid document (seq: %s)', change.id, seq)
-      done()
-      return
+      return cb()
     } else if (!doc.versions || doc.versions.length === 0) {
       console.log('skipping %s - no versions detected (seq: %s, modified: %s)', change.id, seq, modified)
-      done()
-      return
+      return cb()
     }
 
     var versions = Object.keys(doc.versions)
-    processVersion()
-
-    function done (err) {
-      if (err) return cb(err)
-      db.put('!latest_seq!', change.seq, cb)
-    }
-
-    function processVersion (err) {
-      if (err) return done(err)
+    while(versions.length) {
       var version = versions.shift()
-      if (!version) return done()
-      var key = change.id + '@' + version
-      db.get(key, function (err) {
-        if (!err || !err.notFound) return processVersion(err)
-        append(change.seq, doc.versions[version], function (err) {
-          if (err) return done(err)
-          db.put(key, true, processVersion)
-        })
-      })
+      if (version) {
+        var key = change.id + '@' + version
+        append(key, change.seq, doc.versions[version])
+      }
     }
+    cb()
   }
 
-  function getNextSeqNo (cb) {
-    db.get('!latest_seq!', function (err, seq) {
-      if (err && err.notFound) cb(null, 0)
-      else if (err) cb(err)
-      else cb(null, parseInt(seq, 10) + 1)
-    })
-  }
 }
